@@ -25,6 +25,13 @@ const openpgp = require("openpgp");
             encryptionKeys: publicKeys
         });
 
+        const encryptedWithFirstKey = await openpgp.encrypt({
+            message: await openpgp.createMessage({ text: plaintext }), // input as Message object
+            encryptionKeys: publicKeys[0]
+        });
+
+
+
         const encryptedMessage = await openpgp.readMessage({
             armoredMessage: encrypted // parse armored message
         });
@@ -36,19 +43,21 @@ const openpgp = require("openpgp");
             message: encryptedMessage, // parse armored message
             decryptionKeys: privateKeys // for decryption
         });
-        console.log(decrypted.data)
-        // keys.forEach(async (key, i) => {
-        //     //console.log({ key })
-        //     const privateKey = await openpgp.readPrivateKey({
-        //         armoredKey: key.privateKey,
-        //     })
+        keys.forEach(async (key, i) => {
+            //console.log({ key })
+            const privateKey = await openpgp.readPrivateKey({
+                armoredKey: key.privateKey,
+            })
 
-        //     const decrypted = await openpgp.decrypt({
-        //         message: encryptedMessage, // parse armored message
-        //         decryptionKeys: privateKey // for decryption
-        //     });
-        //     //console.log(decrypted.data)
-        // })
+            const encryptedMessage = await openpgp.readMessage({
+                armoredMessage: encrypted // parse armored message
+            });
+            const decrypted = await openpgp.decrypt({
+                message: encryptedMessage, // parse armored message
+                decryptionKeys: privateKey // for decryption
+            });
+            console.log(decrypted.data)
+        })
     } catch (err) {
         console.log(err);
     }
