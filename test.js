@@ -19,15 +19,24 @@ const openpgp = require("openpgp");
         let publicKeys = await Promise.all(keys.map(async (key, index) => {
             return await openpgp.readKey({ armoredKey: key.publicKey })
         }))
-
+        const sk=await openpgp.generateSessionKey(openpgp.enums.symmetric.aes256);
+        console.log(sk)
         const encrypted = await openpgp.encrypt({
             message: await openpgp.createMessage({ text: plaintext }), // input as Message object
-            encryptionKeys: publicKeys
+            encryptionKeys: publicKeys,
+            sessionKey: sk
         });
-
+        console.log(encrypted)
+        let encrypted_2 = await openpgp.encrypt({
+            message: await openpgp.createMessage({ text: plaintext }), // input as Message object
+            encryptionKeys: publicKeys,
+            sessionKey: sk
+        });
+        console.log(encrypted_2)
         const encryptedWithFirstKey = await openpgp.encrypt({
             message: await openpgp.createMessage({ text: plaintext }), // input as Message object
-            encryptionKeys: publicKeys[0]
+            encryptionKeys: publicKeys[0],
+            sessionKey: sk
         });
 
 
